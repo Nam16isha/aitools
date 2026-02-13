@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Tools Directory 2026 Explorer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Chosen Palette: Futuristic Professional -->
+    <!-- Background: Slate-50 (Light, clean) -->
+    <!-- Primary: Indigo-600 (Trust, Tech) -->
+    <!-- Secondary: Slate-800 (Text) -->
+    <!-- Accents: Violet/Emerald for tags -->
+    
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+
+        /* Custom Scrollbar for tool cards if needed */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #c7c7c7;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #a8a8a8;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased selection:bg-indigo-100 selection:text-indigo-700">
+
+    <!-- Application Structure Plan:
+         1. Hero Section: Sets the context of the "2026 Edition" directory.
+         2. Dashboard Section: Two charts (Distribution by Category, Free vs Paid) to give a high-level overview of the AI landscape.
+         3. Control Center: Search, Category Filters, and Pricing Toggles. This is the main navigation mechanism.
+         4. Tool Grid: The core content area displaying cards. Designed for quick scanning with clear visual tags.
+         5. Footer: Simple attribution.
+         
+         Why this structure?
+         The user needs to quickly filter a large dataset (approx 70 tools). A dashboard view first establishes the scope (e.g., "Oh, there are many Design tools"), 
+         and the grid allows for direct access. The single-page design prevents friction between "searching" and "viewing".
+    -->
+
+    <!-- Visualization & Content Choices:
+         1. Category Distribution (Doughnut Chart): Shows which sectors are most saturated with tools.
+         2. Pricing Model (Pie Chart): Helps users understand the accessibility of the ecosystem (Free vs Paid).
+         3. Interactive Cards: Used for the tools themselves to display Name, Description, and Tags clearly.
+         4. Justification: Chart.js is lightweight and responsive. No SVGs used for complex graphics, only FontAwesome for UI icons.
+    -->
+    
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+
+    <!-- Header -->
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-50 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col sm:flex-row justify-between items-center gap-4">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-indigo-600 rounded-lg flex items-center justify-center text-white font-bold text-xl shadow-lg">
+                    AI
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold text-slate-900 leading-tight">Master Directory 2026</h1>
+                    <p class="text-xs text-slate-500 font-medium">Interactive Tool Explorer</p>
+                </div>
+            </div>
+            
+            <div class="flex items-center gap-4">
+                <div class="relative group">
+                    <button id="statsToggle" class="text-sm font-medium text-slate-600 hover:text-indigo-600 transition-colors flex items-center gap-2">
+                        <i class="fa-solid fa-chart-pie"></i> View Stats
+                    </button>
+                </div>
+                <a href="#" class="text-sm font-medium text-slate-600 hover:text-indigo-600 transition-colors">
+                    <i class="fa-solid fa-circle-info"></i> About
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+        
+        <!-- Intro Section -->
+        <section class="text-center max-w-3xl mx-auto space-y-4">
+            <h2 class="text-3xl md:text-4xl font-extrabold text-slate-900 tracking-tight">
+                Navigate the <span class="text-indigo-600">AI Landscape</span>
+            </h2>
+            <p class="text-slate-600 text-lg leading-relaxed">
+                Explore the definitive collection of AI tools for 2026. From Generative Art to Enterprise SEO, analyze the ecosystem and find the perfect tool for your workflow. Use the filters below to narrow down by category or pricing model.
+            </p>
+        </section>
+
+        <!-- Analytics Dashboard -->
+        <section id="analyticsSection" class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 md:p-8 animate-fade-in-down">
+            <div class="flex flex-col md:flex-row justify-between items-center mb-6">
+                <h3 class="text-lg font-semibold text-slate-900 flex items-center gap-2">
+                    <i class="fa-solid fa-chart-simple text-indigo-500"></i> Ecosystem Insights
+                </h3>
+                <span class="text-xs text-slate-500 bg-slate-100 px-2 py-1 rounded-full">Live Data Visualization</span>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12">
+                <!-- Chart 1: Distribution -->
+                <div class="flex flex-col items-center">
+                    <h4 class="text-sm font-medium text-slate-500 mb-4 uppercase tracking-wider">Tools by Category</h4>
+                    <div class="chart-container">
+                        <canvas id="categoryChart"></canvas>
+                    </div>
+                    <p class="text-xs text-center text-slate-400 mt-2">Distribution of tools across 6 major sectors</p>
+                </div>
+                
+                <!-- Chart 2: Pricing -->
+                <div class="flex flex-col items-center">
+                    <h4 class="text-sm font-medium text-slate-500 mb-4 uppercase tracking-wider">Pricing Accessibility</h4>
+                    <div class="chart-container">
+                        <canvas id="pricingChart"></canvas>
+                    </div>
+                    <p class="text-xs text-center text-slate-400 mt-2">Free Tier Availability vs. Paid Only</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Controls & Filters -->
+        <section class="sticky top-[73px] z-40 bg-slate-50/95 backdrop-blur-sm py-4 border-b border-slate-200/60 transition-all duration-300" id="filterBar">
+            <div class="flex flex-col lg:flex-row gap-4 justify-between items-center">
+                
+                <!-- Search -->
+                <div class="relative w-full lg:w-1/3">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <i class="fa-solid fa-magnifying-glass text-slate-400"></i>
+                    </div>
+                    <input type="text" id="searchInput" 
+                        class="block w-full pl-10 pr-3 py-2.5 border border-slate-300 rounded-xl leading-5 bg-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm shadow-sm transition-shadow" 
+                        placeholder="Search tools (e.g., 'ChatGPT', 'Video')...">
+                </div>
+
+                <!-- Category Pills -->
+                <div class="flex flex-wrap justify-center gap-2 w-full lg:w-auto" id="categoryFilters">
+                    <button class="filter-btn active px-3 py-1.5 rounded-full text-xs font-semibold bg-indigo-600 text-white shadow-sm transition-all hover:bg-indigo-700" data-category="All">All</button>
+                    <!-- JS will populate categories -->
+                </div>
+
+                <!-- Price Toggle -->
+                <div class="flex items-center gap-3 bg-white px-3 py-1.5 rounded-lg border border-slate-300 shadow-sm">
+                    <span class="text-xs font-medium text-slate-600">Free/Freemium Only</span>
+                    <button id="priceToggle" class="relative inline-flex flex-shrink-0 h-5 w-9 border-2 border-transparent rounded-full cursor-pointer transition-colors ease-in-out duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 bg-slate-200" role="switch" aria-checked="false">
+                        <span aria-hidden="true" class="pointer-events-none inline-block h-4 w-4 rounded-full bg-white shadow transform ring-0 transition ease-in-out duration-200 translate-x-0"></span>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Result Count -->
+            <div class="mt-2 text-center lg:text-left">
+                <span id="resultCount" class="text-xs font-medium text-slate-500">Showing all tools</span>
+            </div>
+        </section>
+
+        <!-- Tools Grid -->
+        <section id="toolsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <!-- JS will populate cards here -->
+        </section>
+        
+        <!-- Empty State -->
+        <div id="emptyState" class="hidden text-center py-20">
+            <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-slate-100 mb-4">
+                <i class="fa-solid fa-robot text-slate-400 text-2xl"></i>
+            </div>
+            <h3 class="text-lg font-medium text-slate-900">No tools found</h3>
+            <p class="text-slate-500">Try adjusting your search or filters.</p>
+            <button onclick="resetFilters()" class="mt-4 text-indigo-600 hover:text-indigo-800 font-medium text-sm">Clear all filters</button>
+        </div>
+
+    </main>
+
+    <footer class="bg-white border-t border-slate-200 mt-12 py-8">
+        <div class="max-w-7xl mx-auto px-4 text-center">
+            <p class="text-slate-500 text-sm">
+                Generated based on the 2026 Master AI Tools Directory. 
+                <br>Data reflects categorization and pricing status as of latest analysis.
+            </p>
+        </div>
+    </footer>
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        // --- DATA STORE ---
+        // Derived directly from the provided Source Report
+        const aiTools = [
+            // Category 1: General Purpose & Search
+            { name: "ChatGPT", category: "General Purpose", price: "Free", desc: "Access to GPT-4o mini and standard GPT-4o (limited)." },
+            { name: "Google Gemini", category: "General Purpose", price: "Free", desc: "Deep integration with Google ecosystem." },
+            { name: "Claude", category: "General Purpose", price: "Free", desc: "Exceptional for long-form reasoning and coding." },
+            { name: "Perplexity", category: "General Purpose", price: "Free", desc: "AI-powered search engine with real-time citations." },
+            { name: "Microsoft Copilot", category: "General Purpose", price: "Free", desc: "Free access to GPT-4 and DALL-E 3 via Bing/Edge." },
+            { name: "HuggingChat", category: "General Purpose", price: "Free", desc: "Open-source models (Llama, Mistral) hosted for free." },
+            { name: "Mistral AI", category: "General Purpose", price: "Free", desc: "High-performance European LLM with free playground." },
+            { name: "Grok", category: "General Purpose", price: "Free", desc: "Available for research/testing on social platforms." },
+            { name: "Pi", category: "General Purpose", price: "Free", desc: "Personal AI focused on conversational emotional intelligence." },
+            { name: "GPT-4 Turbo / GPT-4o", category: "General Purpose", price: "Paid", desc: "Pay-per-token API usage for developers." },
+            { name: "Claude Pro", category: "General Purpose", price: "Paid", desc: "Higher limits for professional analysis." },
+
+            // Category 2: Marketing & SEO
+            { name: "Wordstream", category: "Marketing & SEO", price: "Free", desc: "Free tools for keyword research and ad audits." },
+            { name: "Simplified", category: "Marketing & SEO", price: "Free", desc: "All-in-one marketing platform with basic free plan." },
+            { name: "Bing", category: "Marketing & SEO", price: "Free", desc: "AI-enhanced search for marketing insights." },
+            { name: "Vidiq", category: "Marketing & SEO", price: "Free", desc: "AI for YouTube growth functional free version." },
+            { name: "Plai", category: "Marketing & SEO", price: "Free", desc: "Automated marketing for small businesses (Trial)." },
+            { name: "Seona AI", category: "Marketing & SEO", price: "Free", desc: "Automated SEO for websites (Limited trials)." },
+            { name: "BlogSEO", category: "Marketing & SEO", price: "Free", desc: "Generates SEO-ready blog posts (Limited credits)." },
+            { name: "Semrush", category: "Marketing & SEO", price: "Paid", desc: "Industry standard for deep SEO analysis." },
+            { name: "Adcreative.ai", category: "Marketing & SEO", price: "Paid", desc: "High-conversion ad creative generation." },
+            { name: "Madgicx", category: "Marketing & SEO", price: "Paid", desc: "Advanced Facebook/Google ad automation." },
+            { name: "Clearscope", category: "Marketing & SEO", price: "Paid", desc: "Content optimization for high-ranking SEO." },
+            { name: "Alli AI", category: "Marketing & SEO", price: "Paid", desc: "Enterprise-level SEO automation for large sites." },
+            { name: "Pencil", category: "Marketing & SEO", price: "Paid", desc: "Generative AI for e-commerce video ads." },
+            { name: "Adcopy.ai", category: "Marketing & SEO", price: "Paid", desc: "Focused specifically on high-performing sales copy." },
+
+            // Category 3: Design, Images & Branding
+            { name: "Canva", category: "Design", price: "Free", desc: "Massive suite of AI design tools available to free users." },
+            { name: "Leonardo.ai", category: "Design", price: "Free", desc: "High-end image generation with daily free credits." },
+            { name: "Microsoft Designer", category: "Design", price: "Free", desc: "Fully free AI design and image creation." },
+            { name: "Playground AI", category: "Design", price: "Free", desc: "Offers 50+ free images per day." },
+            { name: "Ideogram", category: "Design", price: "Free", desc: "Best tool for typography and text within images." },
+            { name: "Uizard", category: "Design", price: "Free", desc: "AI for UI/UX wireframing and design." },
+            { name: "Adobe Firefly", category: "Design", price: "Free", desc: "Available for free via web (credit-based)." },
+            { name: "Bright Eye", category: "Design", price: "Free", desc: "Mobile-first AI multipurpose app." },
+            { name: "Remove.bg", category: "Design", price: "Free", desc: "Instant background removal (Free for low-res)." },
+            { name: "GitMind", category: "Design", price: "Free", desc: "AI mind mapping and flowcharts." },
+            { name: "Midjourney", category: "Design", price: "Paid", desc: "High-fidelity art generation (Subscription only)." },
+            { name: "Looka / Logo AI", category: "Design", price: "Paid", desc: "Professional branding requires payment to download." },
+            { name: "Brandmark", category: "Design", price: "Paid", desc: "Paid for high-resolution logo assets." },
+            { name: "Pebblely", category: "Design", price: "Paid", desc: "Specialized AI for product photography." },
+            { name: "Dall-E 3 API", category: "Design", price: "Paid", desc: "Paid usage for developers and high-volume users." },
+            { name: "MakeLogo.ai", category: "Design", price: "Paid", desc: "Paid per-project for logo generations." },
+
+            // Category 4: Productivity
+            { name: "Taskade", category: "Productivity", price: "Free", desc: "AI-powered productivity and project management." },
+            { name: "Zapier", category: "Productivity", price: "Free", desc: "Automation between apps (Free for simple Zaps)." },
+            { name: "Otter.ai", category: "Productivity", price: "Free", desc: "Meeting transcription (300 free mins/month)." },
+            { name: "Trello", category: "Productivity", price: "Free", desc: "Visual project management with AI automation." },
+            { name: "Notion AI", category: "Productivity", price: "Free", desc: "Document and workspace assistant (Limited)." },
+            { name: "Rows / Excel AI", category: "Productivity", price: "Free", desc: "AI-powered spreadsheets with functional free tier." },
+            { name: "Gamma / Tome", category: "Productivity", price: "Free", desc: "AI presentation generators (Credit-based)." },
+            { name: "Gitfluence", category: "Productivity", price: "Free", desc: "Helps find the right Git command using AI." },
+            { name: "Durable", category: "Productivity", price: "Paid", desc: "Build a full business website in seconds." },
+            { name: "10Web / Wix", category: "Productivity", price: "Paid", desc: "AI website builders (Paid for hosting/full features)." },
+            { name: "Power BI", category: "Productivity", price: "Paid", desc: "Enterprise Microsoft tools (Typically paid)." },
+            { name: "Xembly", category: "Productivity", price: "Paid", desc: "AI executive assistant for scheduling and tasks." },
+            { name: "Tldv", category: "Productivity", price: "Paid", desc: "Meeting recorder and summarizer (Pro is paid)." },
+
+            // Category 5: Video & Audio
+            { name: "Veed.io", category: "Video & Audio", price: "Free", desc: "Online video editor (Free with watermarks)." },
+            { name: "Invideo", category: "Video & Audio", price: "Free", desc: "Text-to-video platform with basic free plan." },
+            { name: "11 Labs", category: "Video & Audio", price: "Free", desc: "Industry-leading AI voices (Limited free use)." },
+            { name: "Suno", category: "Video & Audio", price: "Free", desc: "AI music and song generation (Daily credits)." },
+            { name: "Podcastle", category: "Video & Audio", price: "Free", desc: "AI-powered podcast studio." },
+            { name: "Deep AI", category: "Video & Audio", price: "Free", desc: "Simple API for image and video generation." },
+            { name: "RecCloud", category: "Video & Audio", price: "Free", desc: "Screen recording and AI video processing." },
+            { name: "HeyGen", category: "Video & Audio", price: "Paid", desc: "High-end video avatars and translation." },
+            { name: "Synthesia", category: "Video & Audio", price: "Paid", desc: "Enterprise-grade AI presenters for training." },
+            { name: "Descript", category: "Video & Audio", price: "Paid", desc: "Professional-grade audio/video editing by text." },
+            { name: "Audo AI", category: "Video & Audio", price: "Paid", desc: "One-click audio cleaning and enhancement." },
+            { name: "Ossa AI", category: "Video & Audio", price: "Paid", desc: "Specialized in turning scripts into social videos." },
+
+            // Category 6: Development
+            { name: "Codeium", category: "Development", price: "Free", desc: "Excellent free-for-individuals alternative to Copilot." },
+            { name: "Phind", category: "Development", price: "Free", desc: "Search engine specifically for developers." },
+            { name: "Replit", category: "Development", price: "Free", desc: "Cloud-based IDE with Ghostwriter AI." },
+            { name: "Safurai", category: "Development", price: "Free", desc: "IDE extension for coding assistance." },
+            { name: "TensorFlow", category: "Development", price: "Free", desc: "Open-source frameworks for building AI." },
+            { name: "GitHub Copilot", category: "Development", price: "Paid", desc: "The primary industry standard for code completion." },
+            { name: "Tabnine", category: "Development", price: "Paid", desc: "AI code completion for teams and enterprises." },
+            { name: "MarsAI", category: "Development", price: "Paid", desc: "Low-code platform for building applications." }
+        ];
+
+        // --- STATE MANAGEMENT ---
+        let state = {
+            searchQuery: "",
+            selectedCategory: "All",
+            freeOnly: false
+        };
+
+        // --- DOM ELEMENTS ---
+        const toolsGrid = document.getElementById('toolsGrid');
+        const emptyState = document.getElementById('emptyState');
+        const searchInput = document.getElementById('searchInput');
+        const categoryFiltersContainer = document.getElementById('categoryFilters');
+        const priceToggle = document.getElementById('priceToggle');
+        const resultCount = document.getElementById('resultCount');
+
+        // --- CHART CONFIGURATION ---
+        function initCharts() {
+            // Process Data for Category Chart
+            const catCounts = {};
+            aiTools.forEach(tool => {
+                catCounts[tool.category] = (catCounts[tool.category] || 0) + 1;
+            });
+            const catLabels = Object.keys(catCounts);
+            const catData = Object.values(catCounts);
+
+            // Process Data for Price Chart
+            let freeCount = 0;
+            let paidCount = 0;
+            aiTools.forEach(tool => {
+                if(tool.price === "Free") freeCount++;
+                else paidCount++;
+            });
+
+            // Colors
+            const mainColors = ['#4f46e5', '#8b5cf6', '#ec4899', '#06b6d4', '#10b981', '#f59e0b'];
+            
+            // Render Category Chart (Doughnut)
+            new Chart(document.getElementById('categoryChart'), {
+                type: 'doughnut',
+                data: {
+                    labels: catLabels,
+                    datasets: [{
+                        data: catData,
+                        backgroundColor: mainColors,
+                        borderWidth: 0,
+                        hoverOffset: 10
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10 } } }
+                    },
+                    cutout: '65%'
+                }
+            });
+
+            // Render Price Chart (Pie)
+            new Chart(document.getElementById('pricingChart'), {
+                type: 'pie',
+                data: {
+                    labels: ['Free / Freemium', 'Paid / Premium'],
+                    datasets: [{
+                        data: [freeCount, paidCount],
+                        backgroundColor: ['#10b981', '#f43f5e'],
+                        borderWidth: 0,
+                        hoverOffset: 10
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10 } } }
+                    }
+                }
+            });
+        }
+
+        // --- UI RENDERING ---
+
+        // 1. Render Category Buttons
+        function renderCategoryButtons() {
+            const categories = [...new Set(aiTools.map(t => t.category))];
+            
+            categories.forEach(cat => {
+                const btn = document.createElement('button');
+                btn.className = `filter-btn px-3 py-1.5 rounded-full text-xs font-semibold bg-white text-slate-600 border border-slate-200 hover:bg-slate-50 hover:border-indigo-300 transition-all shadow-sm`;
+                btn.textContent = cat;
+                btn.dataset.category = cat;
+                btn.onclick = () => handleCategoryClick(cat, btn);
+                categoryFiltersContainer.appendChild(btn);
+            });
+        }
+
+        // 2. Render Cards
+        function renderTools() {
+            toolsGrid.innerHTML = '';
+            
+            const filtered = aiTools.filter(tool => {
+                // Search Filter
+                const matchesSearch = tool.name.toLowerCase().includes(state.searchQuery) || 
+                                      tool.desc.toLowerCase().includes(state.searchQuery);
+                // Category Filter
+                const matchesCategory = state.selectedCategory === "All" || tool.category === state.selectedCategory;
+                // Price Filter
+                const matchesPrice = !state.freeOnly || tool.price === "Free";
+
+                return matchesSearch && matchesCategory && matchesPrice;
+            });
+
+            // Update Counts
+            resultCount.textContent = `Showing ${filtered.length} of ${aiTools.length} tools`;
+
+            // Empty State Handling
+            if (filtered.length === 0) {
+                toolsGrid.classList.add('hidden');
+                emptyState.classList.remove('hidden');
+            } else {
+                toolsGrid.classList.remove('hidden');
+                emptyState.classList.add('hidden');
+            }
+
+            // Generate HTML
+            filtered.forEach(tool => {
+                const card = document.createElement('div');
+                card.className = `bg-white rounded-xl p-5 border border-slate-200 shadow-sm hover:shadow-md transition-all duration-200 flex flex-col justify-between group h-full`;
+                
+                // Determine icon based on category
+                let iconClass = 'fa-robot';
+                if(tool.category.includes("Marketing")) iconClass = 'fa-bullhorn';
+                if(tool.category.includes("Design")) iconClass = 'fa-pen-nib';
+                if(tool.category.includes("Video")) iconClass = 'fa-video';
+                if(tool.category.includes("Dev")) iconClass = 'fa-code';
+                if(tool.category.includes("Productivity")) iconClass = 'fa-check-double';
+
+                // Price badge styling
+                const priceBadgeColor = tool.price === 'Free' 
+                    ? 'bg-emerald-100 text-emerald-700' 
+                    : 'bg-rose-100 text-rose-700';
+
+                card.innerHTML = `
+                    <div>
+                        <div class="flex justify-between items-start mb-3">
+                            <div class="w-10 h-10 rounded-lg bg-indigo-50 flex items-center justify-center text-indigo-600 group-hover:bg-indigo-600 group-hover:text-white transition-colors">
+                                <i class="fa-solid ${iconClass}"></i>
+                            </div>
+                            <span class="text-[10px] font-bold uppercase tracking-wide px-2 py-1 rounded-md ${priceBadgeColor}">
+                                ${tool.price}
+                            </span>
+                        </div>
+                        <h3 class="text-lg font-bold text-slate-900 mb-1">${tool.name}</h3>
+                        <p class="text-sm text-slate-500 leading-relaxed">${tool.desc}</p>
+                    </div>
+                    <div class="mt-4 pt-4 border-t border-slate-100 flex items-center justify-between">
+                        <span class="text-xs font-medium text-slate-400 bg-slate-50 px-2 py-1 rounded">${tool.category}</span>
+                        <button class="text-indigo-600 hover:text-indigo-800 text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity">
+                            Details <i class="fa-solid fa-arrow-right ml-1"></i>
+                        </button>
+                    </div>
+                `;
+                toolsGrid.appendChild(card);
+            });
+        }
+
+        // --- EVENT HANDLERS ---
+
+        function handleCategoryClick(category, btnElement) {
+            state.selectedCategory = category;
+            
+            // Update visual state of buttons
+            document.querySelectorAll('.filter-btn').forEach(b => {
+                b.classList.remove('bg-indigo-600', 'text-white');
+                b.classList.add('bg-white', 'text-slate-600');
+            });
+            btnElement.classList.remove('bg-white', 'text-slate-600');
+            btnElement.classList.add('bg-indigo-600', 'text-white');
+
+            renderTools();
+        }
+
+        searchInput.addEventListener('input', (e) => {
+            state.searchQuery = e.target.value.toLowerCase();
+            renderTools();
+        });
+
+        priceToggle.addEventListener('click', () => {
+            state.freeOnly = !state.freeOnly;
+            
+            // Toggle Visuals
+            const toggleDot = priceToggle.querySelector('span');
+            if (state.freeOnly) {
+                priceToggle.classList.remove('bg-slate-200');
+                priceToggle.classList.add('bg-indigo-600');
+                toggleDot.classList.remove('translate-x-0');
+                toggleDot.classList.add('translate-x-4');
+            } else {
+                priceToggle.classList.add('bg-slate-200');
+                priceToggle.classList.remove('bg-indigo-600');
+                toggleDot.classList.add('translate-x-0');
+                toggleDot.classList.remove('translate-x-4');
+            }
+            renderTools();
+        });
+
+        function resetFilters() {
+            state.searchQuery = "";
+            state.selectedCategory = "All";
+            state.freeOnly = false;
+            searchInput.value = "";
+            
+            // Reset Toggle UI
+            priceToggle.classList.add('bg-slate-200');
+            priceToggle.classList.remove('bg-indigo-600');
+            const toggleDot = priceToggle.querySelector('span');
+            toggleDot.classList.add('translate-x-0');
+            toggleDot.classList.remove('translate-x-4');
+
+            // Reset Category Buttons
+            document.querySelectorAll('.filter-btn').forEach(b => {
+                if(b.dataset.category === "All") {
+                    b.classList.add('bg-indigo-600', 'text-white');
+                    b.classList.remove('bg-white', 'text-slate-600');
+                } else {
+                    b.classList.remove('bg-indigo-600', 'text-white');
+                    b.classList.add('bg-white', 'text-slate-600');
+                }
+            });
+
+            renderTools();
+        }
+
+        // --- INITIALIZATION ---
+        window.addEventListener('DOMContentLoaded', () => {
+            renderCategoryButtons();
+            renderTools();
+            initCharts();
+        });
+
+    </script>
+</body>
+</html>
